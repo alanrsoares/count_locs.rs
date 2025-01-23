@@ -131,8 +131,4 @@ Contributions are welcome! Please follow these steps:
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
-
----
-
-Happy coding! 🚀
+This project is licensed under the [Unlicense](LICENSE.md).
