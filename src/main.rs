@@ -5,6 +5,7 @@ use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
+
 /// Filter out empty lines and lines that contain only whitespace
 fn is_valid_line(line: Result<String, std::io::Error>) -> Option<String> {
     line.ok().filter(|l| !l.trim().is_empty())
