@@ -21,7 +21,7 @@ A blazing-fast command-line tool to recursively count lines of code in a directo
 1. Clone the repository:
 
    ```bash
-   git clone <repository-url>
+   git clone git@github.com:alanrsoares/count_locs.rs.git
    cd count_locs
    ```
 
