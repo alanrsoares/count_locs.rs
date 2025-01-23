@@ -5,13 +5,18 @@ use std::env;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
+/// Filter out empty lines and lines that contain only whitespace
+fn is_valid_line(line: Result<String, std::io::Error>) -> Option<String> {
+    line.ok().filter(|l| !l.trim().is_empty())
+}
 
+/// Count the number of lines in a file
 fn count_lines(file_path: &Path) -> usize {
     match File::open(file_path) {
-        Ok(file) => {
-            let reader = BufReader::new(file);
-            reader.lines().filter(|res| res.is_ok()).count()
-        }
+        Ok(file) => BufReader::new(file)
+            .lines()
+            .filter_map(is_valid_line)
+            .count(),
         Err(_) => 0,
     }
 }
