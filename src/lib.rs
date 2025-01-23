@@ -5,6 +5,45 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
 
+/// Enum representing the available commands
+pub enum Command {
+    Help,
+    Version,
+    Count { dir: String, patterns: Vec<String> },
+}
+
+/// Handle a command and dispatch the appropriate action
+pub fn run(command: Command) {
+    match command {
+        Command::Help => print_help(),
+        Command::Version => print_version(),
+        Command::Count { dir, patterns } => process_input(&dir, &patterns)
+    }
+}
+
+/// Parse command-line arguments into a Command
+pub fn parse_command(args: &[String]) -> Result<Command, String> {
+    match args {
+        // Help command
+        [_, flag] if flag == "--help" || flag == "-h" => Ok(Command::Help),
+
+        // Version command
+        [_, flag] if flag == "--version" || flag == "-v" => Ok(Command::Version),
+
+        // Insufficient arguments
+        [_] => Err(String::from("Usage: count_locs <directory> <glob-patterns>...")),
+
+        // Count command
+        [_, dir, patterns @ ..] => Ok(Command::Count {
+            dir: dir.to_string(),
+            patterns: patterns.iter().map(String::from).collect(),
+        }),
+
+        // Fallback
+        _ => Err(String::from("Invalid arguments. Use --help for usage information.")),
+    }
+}
+
 /// Filter out empty lines and lines that contain only whitespace
 pub fn is_valid_line(line: Result<String, std::io::Error>) -> Option<String> {
     line.ok().filter(|l| !l.trim().is_empty())
@@ -54,19 +93,36 @@ Examples:\n\
 count_locs ./src \"**/*.rs\" \"**/*.ts\"\n\
 count_locs ./ \"**/*.css\"";
 
-
 /// Print program help
 pub fn print_help() {
-    println!(
-        "{}",
-        HELP_MESSAGE
-    );
+    println!("{}", HELP_MESSAGE);
 }
 
+/// Print program version
 pub fn print_version() {
     println!("count_locs version {}", env!("CARGO_PKG_VERSION"));
 }
 
+/// Print an error message to stderr
 pub fn print_error(message: &str) {
     eprintln!("{}", message);
+}
+
+/// Process input: count lines of code and print results
+pub fn process_input(dir: &str, patterns: &[String]) {
+    let root = std::fs::canonicalize(dir).expect("Failed to resolve directory");
+    let patterns_vec: Vec<String> = patterns.iter().map(String::from).collect();
+    let results = count_locs(&root, &patterns_vec);
+
+    let total_lines: usize = results.values().copied().sum();
+
+    if patterns_vec.len() > 1 {
+        println!("Breakdown of Lines of Code by Glob:");
+        for (pattern, &lines) in &results {
+            println!("  {}: {}", pattern, lines);
+        }
+        println!();
+    }
+
+    println!("Total lines of code: {}", total_lines);
 }
