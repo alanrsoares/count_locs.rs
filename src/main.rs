@@ -2,49 +2,54 @@ use globwalk;
 use rayon::prelude::*;
 use std::collections::HashMap;
 use std::env;
-use std::fs;
-use std::io::{self, BufRead};
+use std::fs::File;
+use std::io::{BufRead, BufReader};
 use std::path::Path;
 
 fn count_lines(file_path: &Path) -> usize {
-    fs::File::open(file_path)
-        .ok()
-        .map(|file| io::BufReader::new(file).lines().count())
-        .unwrap_or(0)
+    match File::open(file_path) {
+        Ok(file) => {
+            let reader = BufReader::new(file);
+            reader.lines().filter(|res| res.is_ok()).count()
+        }
+        Err(_) => 0,
+    }
 }
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 3 {
         eprintln!("Usage: {} <directory> <glob-patterns>...", args[0]);
-        std::process::exit(1); // Exit with a non-zero status
+        std::process::exit(1);
     }
 
     let root = std::fs::canonicalize(&args[1]).expect("Failed to resolve directory");
     let patterns = &args[2..];
 
-    let results: HashMap<_, _> = patterns
-        .iter()
-        .map(|pattern| {
-            let lines: usize = globwalk::GlobWalkerBuilder::from_patterns(&root, &[pattern])
-                .build()
-                .expect("Failed to build glob walker")
-                .into_iter()
-                .filter_map(Result::ok)
-                .par_bridge()
-                .map(|entry| count_lines(entry.path()))
-                .sum();
+    let mut results = HashMap::new();
 
-            (pattern, lines)
-        })
-        .collect();
+    for pattern in patterns {
+        let walker = globwalk::GlobWalkerBuilder::from_patterns(&root, &[pattern])
+            .build()
+            .expect("Failed to build glob walker");
 
-    let total_lines: usize = results.values().sum();
+        let entries: Vec<_> = walker.into_iter().filter_map(Result::ok).collect();
 
-    // Output the results
+        let lines: usize = entries
+            .par_iter() // Parallelize over the collected entries
+            .map(|entry| count_lines(entry.path()))
+            .sum();
+
+        results.insert(pattern.as_str(), lines);
+    }
+
+    let total_lines: usize = results.values().copied().sum();
+
     if patterns.len() > 1 {
         println!("Breakdown of Lines of Code by Glob:");
-        results.iter().for_each(|(pattern, lines)| println!("  {}: {}", pattern, lines));
+        for (pattern, &lines) in &results {
+            println!("  {}: {}", pattern, lines);
+        }
         println!();
     }
 
