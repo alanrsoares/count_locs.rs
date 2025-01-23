@@ -45,3 +45,28 @@ pub fn count_locs(
 
     results
 }
+
+pub const HELP_MESSAGE: &str = "Usage: count_locs <directory> <glob-patterns>...\n\n\
+Options:\n\
+-h, --help       Show this help message\n\
+-v, --version    Show version information\n\n\
+Examples:\n\
+count_locs ./src \"**/*.rs\" \"**/*.ts\"\n\
+count_locs ./ \"**/*.css\"";
+
+
+/// Print program help
+pub fn print_help() {
+    println!(
+        "{}",
+        HELP_MESSAGE
+    );
+}
+
+pub fn print_version() {
+    println!("count_locs version {}", env!("CARGO_PKG_VERSION"));
+}
+
+pub fn print_error(message: &str) {
+    eprintln!("{}", message);
+}
