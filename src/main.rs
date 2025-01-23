@@ -24,11 +24,12 @@ fn main() {
         // Handle valid input with a directory and glob patterns
         [_, dir, patterns @ ..] => {
             let root = std::fs::canonicalize(dir).expect("Failed to resolve directory");
-            let results = count_locs(&root, &patterns.iter().map(String::from).collect::<Vec<_>>());
+            let patterns_vec = patterns.iter().map(String::from).collect::<Vec<_>>();
+            let results = count_locs(&root, &patterns_vec);
 
             let total_lines: usize = results.values().copied().sum();
 
-            if patterns.len() > 1 {
+            if patterns_vec.len() > 1 {
                 println!("Breakdown of Lines of Code by Glob:");
                 for (pattern, &lines) in &results {
                     println!("  {}: {}", pattern, lines);
