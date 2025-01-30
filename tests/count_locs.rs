@@ -22,7 +22,7 @@ fn it_calculates_total_loc_for_single_glob() {
         .args([temp_path.to_str().unwrap(), "**/*.rs"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("Total lines of code: 3"));
+        .stdout(predicate::str::contains("3 lines of code"));
 }
 
 #[test]
@@ -56,7 +56,7 @@ fn it_displays_breakdown_for_multiple_globs() {
         .stdout(predicate::str::contains("**/*.ts: 1"))
         .stdout(predicate::str::contains("**/*.tsx: 2"))
         .stdout(predicate::str::contains("**/*.rs: 2"))
-        .stdout(predicate::str::contains("Total lines of code: 5"));
+        .stdout(predicate::str::contains("5 lines of code"));
 }
 
 #[test]
@@ -70,7 +70,7 @@ fn it_handles_no_matching_files() {
         .args([temp_path.to_str().unwrap(), "**/*.java"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("Total lines of code: 0"));
+        .stdout(predicate::str::contains("0 lines of code"));
 }
 
 #[test]
@@ -96,7 +96,7 @@ fn it_ignores_whitespace_lines() {
         .args([temp_path.to_str().unwrap(), "**/*.rs"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("Total lines of code: 1"));
+        .stdout(predicate::str::contains("1 lines of code"));
 }
 
 #[test]
@@ -117,5 +117,5 @@ fn it_handles_mixed_line_endings() {
         .args([temp_path.to_str().unwrap(), "**/*.rs"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("Total lines of code: 2"));
+        .stdout(predicate::str::contains("2 lines of code"));
 }

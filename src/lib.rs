@@ -4,6 +4,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::Path;
+use std::time::Instant;
 
 /// Enum representing the available commands
 pub enum Command {
@@ -17,7 +18,7 @@ pub fn run(command: Command) {
     match command {
         Command::Help => print_help(),
         Command::Version => print_version(),
-        Command::Count { dir, patterns } => process_input(&dir, &patterns)
+        Command::Count { dir, patterns } => process_input(&dir, &patterns),
     }
 }
 
@@ -110,6 +111,9 @@ pub fn print_error(message: &str) {
 
 /// Process input: count lines of code and print results
 pub fn process_input(dir: &str, patterns: &[String]) {
+    // Start measuring time
+    let start_time = Instant::now();
+
     let root = std::fs::canonicalize(dir).expect("Failed to resolve directory");
     let patterns_vec: Vec<String> = patterns.iter().map(String::from).collect();
     let results = count_locs(&root, &patterns_vec);
@@ -117,12 +121,16 @@ pub fn process_input(dir: &str, patterns: &[String]) {
     let total_lines: usize = results.values().copied().sum();
 
     if patterns_vec.len() > 1 {
-        println!("Breakdown of Lines of Code by Glob:");
+        println!("Breakdown of Lines of Code by Glob:\n");
         for (pattern, &lines) in &results {
             println!("  {}: {}", pattern, lines);
         }
         println!();
     }
 
-    println!("Total lines of code: {}", total_lines);
+    println!(
+        "Total:\t{} lines of code\n\n{:.2?}", 
+        total_lines, 
+        start_time.elapsed()
+    );
 }
