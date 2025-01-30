@@ -1,6 +1,6 @@
 # 🦀 Count LOCs 🦀
 
-A blazing-fast command-line tool to recursively count lines of code in a directory, supporting custom glob patterns for file matching. Built with **Rust**, leveraging parallel processing for speed and efficiency.
+A blazing-fast™️ command-line tool to recursively count lines of code in a directory, supporting custom glob patterns for file matching. Built with **Rust**, leveraging parallel processing for speed and efficiency.
 
 ## Features
 
